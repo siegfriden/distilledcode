@@ -1,0 +1,53 @@
+---
+import { render } from "astro:content";
+import RootLayout from "../../layouts/RootLayout.astro";
+import FormattedDate from "../../components/FormattedDate.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import { getAllBlogPosts } from "../../content";
+
+export async function getStaticPaths() {
+  const posts = await getAllBlogPosts();
+  const routes = posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+  return routes;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate } = post.data;
+const { headings, Content } = await render(post);
+---
+
+<RootLayout title={title}>
+  <article>
+    <header>
+      <h1>{title}</h1>
+      <p>{description}</p>
+      <p>Published on <FormattedDate date={pubDate} /></p>
+      <hr />
+    </header>
+
+    {headings.length > 0 && <TableOfContents headings={headings} />}
+
+    <div class="content">
+      <Content />
+    </div>
+  </article>
+</RootLayout>
+
+<style is:global>
+  /* this doesn't work on <Content /> without is:global */
+
+  /* fits images on smaller screens */
+  .content img {
+    max-width: 100%;
+    height: auto; /* ensure proper aspect ratio */
+  }
+
+  /* sets the tab size on code blocks */
+  .content pre,
+  .content code {
+    tab-size: 4;
+  }
+</style>

@@ -1,0 +1,25 @@
+---
+interface Props {
+  date: Date;
+}
+
+const { date } = Astro.props;
+
+const isoDate = date.toISOString().split("T")[0];
+const localeDate = date.toLocaleDateString("en-GB", {
+  weekday: "long",
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+});
+---
+
+<!--
+<time> opening and closing tags must be in the same line.
+
+If split across multiple lines, Astro adds unwanted whitespaces
+around the content (e.g. `<time> 25 Oct 2025 </time>`).
+These whitespaces will appear when the component is wrapped
+by parentheses or brackets.
+-->
+<time datetime={isoDate}>{localeDate}</time>
