@@ -1,0 +1,33 @@
+---
+import type { CollectionEntry } from "astro:content";
+import FormattedDate from "./FormattedDate.astro";
+
+interface Props {
+  posts: CollectionEntry<"blog">[];
+}
+
+const { posts } = Astro.props;
+---
+
+<ul>
+  {
+    posts.map(({ id, data: { title, description, pubDate, updatedDate } }) => (
+      <li>
+        <article>
+          <div>
+            <a href={`/blog/${id}/`}>{title}</a>
+          </div>
+          <p>{description}</p>
+          <p>
+            <FormattedDate date={pubDate} />
+            {updatedDate && updatedDate > pubDate && (
+              <span>
+                (updated <FormattedDate date={updatedDate} />)
+              </span>
+            )}
+          </p>
+        </article>
+      </li>
+    ))
+  }
+</ul>
