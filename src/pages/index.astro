@@ -1,7 +1,24 @@
 ---
 import RootLayout from "../layouts/RootLayout.astro";
+import PostList from "../components/PostList.astro";
+import { getAllBlogPosts } from "../content";
+
+const posts = await getAllBlogPosts();
+const recentPosts = posts.slice(0, 3);
 ---
 
 <RootLayout title="Home">
   <h1>Home</h1>
+  <section>
+    <p>
+      Welcome to my personal blog!<br />
+      I write about various topics in web development.<br />
+      My goal is to run my own secure cloud infrastructure and host my apps on it.
+    </p>
+  </section>
+  <section>
+    <h2>Recent posts</h2>
+    <PostList posts={recentPosts} />
+    <a href="/blog/">See all posts →</a>
+  </section>
 </RootLayout>
