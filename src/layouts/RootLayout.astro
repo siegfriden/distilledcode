@@ -15,10 +15,12 @@ const { title } = Astro.props;
     <title>{title}</title>
   </head>
 
-  <body>
+  <body class="page">
     <header>
       <nav aria-label="Main navigation">
         <a href="/">Home</a>
+        <span aria-hidden="true">|</span>
+        <a href="/blog/">Blog</a>
         <span aria-hidden="true">|</span>
         <a href="/about/">About</a>
       </nav>
@@ -31,3 +33,17 @@ const { title } = Astro.props;
     <footer>© 2025 Nathan Siegfrid</footer>
   </body>
 </html>
+
+<style>
+  .page {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1rem;
+
+    background-color: beige;
+  }
+</style>
