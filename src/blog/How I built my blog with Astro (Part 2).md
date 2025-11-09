@@ -2,6 +2,7 @@
 title: How I built my blog with Astro (Part 2)
 description: Building an unstyled feature-complete Markdown blog.
 pubDate: 26 Oct 2025 18:00 +0700
+updatedDate: 09 Nov 2025 12:00 +0700
 tags:
   - astro
   - blog
@@ -325,6 +326,108 @@ const recentPosts = posts.slice(0, 3);
 </RootLayout>
 ```
 
+## Fixing the rough edges
+
+Troubleshooting notes for type errors and rendering quirks I found along the way.
+
+### Type error on `astro:content` import
+
+The `astro:content` module depends on `.astro` folder in the project root, which is generated when we run `astro dev` (`npm run dev`). If we remove it, we'll encounter some TypeScript errors.
+
+![Type error on `astro:content` import](assets/How%20I%20built%20my%20blog%20with%20Astro%20(Part%202)%20--%20Image%2003.jpg)
+
+This isn't a major issue, but I prefer not having people see errors immediately after cloning the source code. Fortunately, they're easy to fix.
+
+#### Cannot find module `astro:content`
+
+To fix this, add the `astro/client` type to `tsconfig.json`.
+
+```json tsconfig.json
+{
+	...
+	"compilerOptions": {
+		"types": ["astro/client"]
+	}
+}
+```
+
+#### Implicit any type
+
+The root cause of this error is that the type definition for `getCollection` isn't available until the `.astro` folder is generated. Without that folder, the return type of `getCollection()` becomes `any`. Calling `.map()` or `.sort()` on it triggers the "implicit 'any'" error. To fix this, we need to explicitly type the return value.
+
+```js src/content.ts
+import { getCollection } from "astro:content";
+
+export async function getAllBlogPosts() {
+	const posts = (await getCollection("blog")) as CollectionEntry<"blog">[];
+	const sortedByDateDesc = posts.sort(
+		(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+	);
+	return sortedByDateDesc;
+}
+```
+
+### Type error on `paginate` function
+
+Astro doesn't provide type definitions for `getStaticPaths`, even with `.astro` folder present. Following the docs for [`paginate`](https://docs.astro.build/en/reference/routing-reference/#paginate) will result in the error below.
+
+![Type error on paginate function](assets/How%20I%20built%20my%20blog%20with%20Astro%20(Part%202)%20--%20Image%2004.jpg)
+
+Therefore, we need to manually type the function arguments.
+
+```jsx
+import type { GetStaticPathsOptions } from "astro";
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+	...
+}
+```
+
+### Unwanted whitespaces on `FormattedDate` component
+
+Astro's blog template uses the `<FormattedDate>` element for accessibility.
+
+```jsx src/components/FormattedDate.astro
+---
+interface Props {
+  date: Date;
+}
+
+const { date } = Astro.props;
+---
+
+<time datetime={date.toISOString()}>
+	{
+		date.toLocaleDateString("en-us", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+		})
+	}
+</time>
+```
+
+ This component adds unexpected whitespaces around the content. The rendered HTML will look like `<time> 25 Oct 2025 </time>`. These spaces appear when we wrap the component in parenthesis or brackets.
+
+![](assets/How%20I%20built%20my%20blog%20with%20Astro%20(Part%202)%20--%20Image%2005.jpg)
+
+This problem occurs when the `<time>` element is split across multiple lines. To work around this, we need to place the opening and closing `<time>` tags on the same line.
+
+```jsx src/components/FormattedDate.astro
+---
+interface Props {
+  date: Date;
+}
+
+const { date } = Astro.props;
+
+const isoDate = date.toISOString().split("T")[0];
+const localeDate = date.toLocaleDateString();
+---
+
+<time datetime={isoDate}>{localeDate}</time>
+```
+
 ## What's next
 
-The blog is now complete and functional. In the next post, I will discuss some type errors and gotchas I found when building the blog.
+The blog is now complete and functional. In future posts, I may cover additional features such as RSS, search functionality, and displaying file names on code blocks.
