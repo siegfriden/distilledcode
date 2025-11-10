@@ -21,7 +21,7 @@ For this blog, I'm using Astro's [Content Loader API](https://docs.astro.build/e
 
 First, let's create an example Markdown post at `src/blog/hello.md`. Avoid using the top level heading (`#`) in the content, it will be rendered into `<h1>` which should be reserved for the post title.
 
-```markdown src/blog/hello.md
+```markdown file="src/blog/hello.md"
 ---
 title: Hello, World
 description: My very first blog post.
@@ -42,7 +42,7 @@ Inside the frontmatter (between `---`) is the post's metadata. I'm using the [RF
 
 To define Astro content collections, we need to create `src/content.config.ts`. I defined a `"blog"` collection in the example below.
 
-```js src/content.config.ts
+```typescript file="src/content.config.ts"
 import { defineCollection, z } from "astro:content";
 import { glob } from "astro/loaders";
 
@@ -71,10 +71,14 @@ I set the `loader` to import all Markdown files in `src/blog`, excluding filenam
 
 To retrieve the `"blog"` collection, we use `getCollection` function from `astro:content`. The function takes the collection name as an argument.
 
-```js src/contentQuery.ts
+```astro
+---
 import { getCollection, type CollectionEntry } from "astro:content";
 
-const posts = await getCollection("blog"));
+const posts = await getCollection("blog");
+---
+
+<!-- page content -->
 ```
 
 The code above will return an array of `CollectionEntry`. If we print it out with `console.log`, it would look like this:
@@ -106,7 +110,7 @@ The `id` field is a URL-friendly slug, based on the Markdown file's path relativ
 
 One thing to note is that this array of posts is not sorted, we have to sort them manually. Since I'm using the collection in multiple places, I made a helper function to retrieve the `blog` collection and immediately sort the posts by `pubDate`.
 
-```js src/content.ts
+```typescript file="src/content.ts"
 import { getCollection } from "astro:content";
 
 export async function getAllBlogPosts() {
@@ -130,7 +134,7 @@ If you used the `**/*.md` pattern in the `loader` to include subdirectories, you
 
 In the page file, we can define multiple routes with [`getStaticPaths`](https://docs.astro.build/en/reference/routing-reference/#getstaticpaths) function. Use the post `id` to populate the `slug` param, and pass in the `post` object as props.
 
-```jsx src/pages/blog/[slug].astro
+```astro file="src/pages/blog/[slug].astro"
 ---
 import { getAllBlogPosts } from "../../content";
 
@@ -153,7 +157,7 @@ export async function getStaticPaths() {
 
 With the `post` object in the props, we can use the [`render`](https://docs.astro.build/en/reference/modules/astro-content/#render) function the get its `headings` and the `Content` component. The frontmatter can be accessed from `post.data`. That's everything we need to build the page.
 
-```jsx src/pages/blog/[slug].astro
+```astro file="src/pages/blog/[slug].astro"
 ---
 import { render } from "astro:content";
 import RootLayout from "../../layouts/RootLayout.astro";
@@ -200,7 +204,9 @@ Using the example Markdown file before, we should see the page below on `/blog/h
 
 I wasn't planning to add any style to the blog at this stage, but I needed to fix some display problems on the content. The code below prevents images from overflowing on smaller screens and sets the tab size to 4 (defaults to 8).
 
-```jsx
+```astro file="src/pages/blog/[slug].astro"
+...
+
 <style is:global>
 	/* this doesn't work on <Content /> without is:global */
 
@@ -222,7 +228,7 @@ I wasn't planning to add any style to the blog at this stage, but I needed to fi
 
 The last step is to list all our blog posts on `/blog` and show some recent posts on the home page. Let's first create a simple `PostList.astro` component.
 
-```jsx src/components/PostList.astro
+```astro file="src/components/PostList.astro"
 ---
 import type { CollectionEntry } from "astro:content";
 import FormattedDate from "./FormattedDate.astro";
@@ -266,7 +272,7 @@ For now, I'll keep my main list page at `/blog`. I might change this later, mayb
 
 On each page, `paginate` passes in a `page` object as props. We can use it to create a page navigation. To display the list of posts, pass in `page.data` to our `PostList` component. The amount of page and items are determined by the `pageSize` defined in `paginate`.
 
-```jsx src/pages/blog/[...page].astro
+```astro file="src/pages/blog/[...page].astro"
 ---
 import type { GetStaticPathsOptions } from "astro";
 import RootLayout from "../../layouts/RootLayout.astro";
@@ -305,7 +311,7 @@ Now we have a working paginated post list.
 
 This one is very simple, just pass in the desired slice of posts to the `PostList` component.
 
-```jsx src/pages/index.astro
+```astro file="src/pages/index.astro"
 ---
 import PostList from "../components/PostList.astro";
 import RootLayout from "../layouts/RootLayout.astro";
@@ -342,7 +348,7 @@ This isn't a major issue, but I prefer not having people see errors immediately 
 
 To fix this, add the `astro/client` type to `tsconfig.json`.
 
-```json tsconfig.json
+```json file="tsconfig.json"
 {
 	...
 	"compilerOptions": {
@@ -355,7 +361,7 @@ To fix this, add the `astro/client` type to `tsconfig.json`.
 
 The root cause of this error is that the type definition for `getCollection` isn't available until the `.astro` folder is generated. Without that folder, the return type of `getCollection()` becomes `any`. Calling `.map()` or `.sort()` on it triggers the "implicit 'any'" error. To fix this, we need to explicitly type the return value.
 
-```js src/content.ts
+```typescript file="src/content.ts"
 import { getCollection } from "astro:content";
 
 export async function getAllBlogPosts() {
@@ -375,7 +381,7 @@ Astro doesn't provide type definitions for `getStaticPaths`, even with `.astro` 
 
 Therefore, we need to manually type the function arguments.
 
-```jsx
+```astro
 import type { GetStaticPathsOptions } from "astro";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
@@ -387,7 +393,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
 
 If you use Astro's blog template, you'll find that it has a `<FormattedDate>` component for displaying time. It uses the `<time>` element with a machine-readable `datetime` property, which is useful for accessibility.
 
-```jsx src/components/FormattedDate.astro
+```astro file="src/components/FormattedDate.astro"
 ---
 interface Props {
   date: Date;
@@ -413,7 +419,7 @@ const { date } = Astro.props;
 
 This problem occurs when the `<time>` element is split across multiple lines. To work around this, we need to place the opening and closing `<time>` tags on the same line.
 
-```jsx src/components/FormattedDate.astro
+```astro file="src/components/FormattedDate.astro"
 ---
 interface Props {
   date: Date;

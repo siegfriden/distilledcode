@@ -46,7 +46,7 @@ Images can be placed in `public` but Astro recommends keeping them in `src` so t
 
 I started with a simple `src/pages/about.astro` page.
 
-```jsx src/pages/about.astro
+```astro file="src/pages/about.astro"
 ---
 
 ---
@@ -67,7 +67,7 @@ The frontmatter (the section between `---` at the top) is a special section in A
 
 For client-side JS, we write them in the `<script>` element:
 
-```jsx
+```astro
 ---
 console.log("This runs once at build time.")
 ---
@@ -87,7 +87,7 @@ Since each Astro page must be a complete HTML document, we use layouts to avoid 
 
 I created `src/layouts/RootLayout.astro` based on the original `index.astro` file, adding a nav header and a footer. Dynamic content was replaced with props and a `<slot>` element.
 
-```jsx src/layouts/RootLayout.astro
+```astro file="src/layouts/RootLayout.astro"
 ---
 interface Props {
 	title: string;
@@ -126,7 +126,7 @@ const { title } = Astro.props;
 
 Here's what the page files look like using the layout component:
 
-```jsx src/pages/index.astro
+```astro file="src/pages/index.astro"
 ---
 import RootLayout from "../layouts/RootLayout.astro";
 ---
@@ -136,7 +136,7 @@ import RootLayout from "../layouts/RootLayout.astro";
 </RootLayout>
 ```
 
-```jsx src/pages/about.astro
+```astro file="src/pages/about.astro"
 ---
 import RootLayout from "../layouts/RootLayout.astro";
 ---

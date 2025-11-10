@@ -37,7 +37,7 @@ const { headings, Content } = await render(post);
 </RootLayout>
 
 <style is:global>
-  /* this doesn't work on <Content /> without is:global */
+  /* this doesn't work without is:global */
 
   /* fits images on smaller screens */
   .content img {
@@ -45,9 +45,89 @@ const { headings, Content } = await render(post);
     height: auto; /* ensure proper aspect ratio */
   }
 
-  /* sets the tab size on code blocks */
-  .content pre,
-  .content code {
+  /* code container & header */
+  .code-container {
+    border-radius: 8px;
+    background-color: #24292e;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    margin: 1.5rem 0;
+  }
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #2f363d;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #30363d;
+    font-size: 0.875rem;
+  }
+  .code-filename {
+    padding: 0 0.25rem;
+    color: #e1e4e8;
+    font-weight: 500;
+    font-family: monospace;
+    user-select: text;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .code-copy {
+    background-color: #21262d;
+    color: #adbac7;
+    border: 1px solid #373e47;
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+  .code-copy:hover {
+    background-color: #30363d;
+    color: #f0f6fc;
+    border-color: #6e7681;
+  }
+  .code-copy:active {
+    background-color: #1f6feb;
+    color: #fff;
+    border-color: #1f6feb;
+  }
+
+  /* code content */
+  .code-container pre {
+    margin: 0;
+    padding: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
     tab-size: 4;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #484f58 #24292e;
+  }
+  .code-container pre::-webkit-scrollbar {
+    height: 8px;
+  }
+  .code-container pre::-webkit-scrollbar-thumb {
+    background-color: #484f58;
+    border-radius: 4px;
+  }
+  .code-container pre::-webkit-scrollbar-thumb:hover {
+    background-color: #6e7681;
   }
 </style>
+
+<script>
+  // code block copy button functionality
+  document.addEventListener("click", (e: MouseEvent) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(
+      ".code-copy"
+    );
+    if (!btn) return;
+
+    const container = btn.closest(".code-container");
+    const pre = container?.querySelector("pre");
+    if (!pre) return;
+
+    navigator.clipboard.writeText(pre.innerText);
+  });
+</script>
