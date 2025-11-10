@@ -2,7 +2,7 @@
 title: How I built my blog with Astro (Part 2)
 description: Building an unstyled feature-complete Markdown blog.
 pubDate: 26 Oct 2025 18:00 +0700
-updatedDate: 09 Nov 2025 12:00 +0700
+updatedDate: 10 Nov 2025 09:00 +0700
 tags:
   - astro
   - blog
@@ -385,7 +385,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
 
 ### Unwanted whitespaces on `FormattedDate` component
 
-Astro's blog template uses the `<FormattedDate>` element for accessibility.
+If you use Astro's blog template, you'll find that it has a `<FormattedDate>` component for displaying time. It uses the `<time>` element with a machine-readable `datetime` property, which is useful for accessibility.
 
 ```jsx src/components/FormattedDate.astro
 ---
@@ -407,9 +407,9 @@ const { date } = Astro.props;
 </time>
 ```
 
- This component adds unexpected whitespaces around the content. The rendered HTML will look like `<time> 25 Oct 2025 </time>`. These spaces appear when we wrap the component in parenthesis or brackets.
+ However, the component above adds unexpected whitespaces around the content. The rendered HTML will look like `<time> 25 Oct 2025 </time>`. These spaces appear when we wrap the component in parentheses or brackets.
 
-![](assets/How%20I%20built%20my%20blog%20with%20Astro%20(Part%202)%20--%20Image%2005.jpg)
+![Rendered date showing extra whitespace](assets/How%20I%20built%20my%20blog%20with%20Astro%20(Part%202)%20--%20Image%2005.jpg)
 
 This problem occurs when the `<time>` element is split across multiple lines. To work around this, we need to place the opening and closing `<time>` tags on the same line.
 
@@ -421,8 +421,12 @@ interface Props {
 
 const { date } = Astro.props;
 
-const isoDate = date.toISOString().split("T")[0];
-const localeDate = date.toLocaleDateString();
+const isoDate = date.toISOString();
+const localeDate = date.toLocaleDateString("en-us", {
+	year: "numeric",
+	month: "short",
+	day: "numeric",
+});
 ---
 
 <time datetime={isoDate}>{localeDate}</time>
@@ -430,4 +434,4 @@ const localeDate = date.toLocaleDateString();
 
 ## What's next
 
-The blog is now complete and functional. In future posts, I may cover additional features such as RSS, search functionality, and displaying file names on code blocks.
+The blog is now complete and functional. I want to have a search functionality on my blog, but it's not included in the blog template. I may write about it in my next post after I've done some research.
