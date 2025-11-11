@@ -2,7 +2,7 @@
 title: How I built my blog with Astro (Part 2)
 description: Building an unstyled feature-complete Markdown blog.
 pubDate: 26 Oct 2025 18:00 +0700
-updatedDate: 10 Nov 2025 09:00 +0700
+updatedDate: 11 Nov 2025 15:00 +0700
 tags:
   - astro
   - blog
@@ -417,7 +417,7 @@ const { date } = Astro.props;
 
 ![Rendered date showing extra whitespace](assets/How%20I%20built%20my%20blog%20with%20Astro%20(Part%202)%20--%20Image%2005.jpg)
 
-This problem occurs when the `<time>` element is split across multiple lines. To work around this, we need to place the opening and closing `<time>` tags on the same line.
+This problem occurs when the `<time>` element is formatted across multiple lines. To work around this, we need to place the opening and closing `<time>` tags on the same line.
 
 ```astro file="src/components/FormattedDate.astro"
 ---
@@ -437,6 +437,8 @@ const localeDate = date.toLocaleDateString("en-us", {
 
 <time datetime={isoDate}>{localeDate}</time>
 ```
+
+JSX comments also add unwanted whitespace. HTML comments don't have this problem, but Astro will include them in the final rendered HTML. In this case, it's best to keep comments inside the frontmatter.
 
 ## What's next
 

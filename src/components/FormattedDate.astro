@@ -12,16 +12,10 @@ const localeDate = date.toLocaleDateString("en-GB", {
   month: "long",
   year: "numeric",
 });
+
+// Keep the <time> element below on a single line.
+// Breaking it into multiple lines will result in unwanted spaces in the HTML output.
+// JSX comments also introduce spaces.
 ---
 
 <time datetime={isoDate}>{localeDate}</time>
-{
-  /*
-  Opening and closing tags of the <time> element must be in the same line.
-
-  If split across multiple lines, Astro adds unwanted whitespaces
-  around the content (e.g. `<time> 25 Oct 2025 </time>`).
-  These whitespaces will appear when the component is wrapped
-  by parentheses or brackets.
-  */
-}
